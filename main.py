@@ -12,14 +12,23 @@ def get_file_name(url):
     return file_name
 
 
+def check_for_redirect(response, url):
+    if response.history and response.url != url:
+        raise requests.HTTPError()
+
+
 def download_file(url, filename, file_dir, params=None):
     response = requests.get(url, params)
     response.raise_for_status()
 
     file_path = os.path.join(file_dir, filename)
 
-    with open(file_path, "wb") as file:
-        file.write(response.content)
+    try:
+        check_for_redirect(response, url)
+        with open(file_path, "wb") as file:
+            file.write(response.content)
+    except requests.exceptions.HTTPError:
+        pass
 
 
 def main():
