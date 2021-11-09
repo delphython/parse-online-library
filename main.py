@@ -19,11 +19,11 @@ def main():
 
     # dvmn_api_key = os.environ[""]
 
-    dvmn_file_url = "https://dvmn.org/assets/img/logo.8d8f24edbb5f.svg"
-    dvmn_file_name = "dvmn.svg"
-    dvmn_file_dir = os.getcwd()
+    file_url = "https://tululu.org/txt.php?id=32168"
+    file_name = "Peski_Marsa.txt"
+    file_dir = os.getcwd()
 
-    download_file(dvmn_file_url, dvmn_file_name, dvmn_file_dir)
+    download_file(file_url, file_name, file_dir)
 
 
 if __name__ == "__main__":
