@@ -8,7 +8,9 @@ response.raise_for_status()
 soup = BeautifulSoup(response.text, "lxml")
 title_tag = soup.find("h1")
 title_text = title_tag.text
-print(title_text)
 heading, author = title_text.split("::")
 print(f"Заголовок: {heading.strip()}")
 print(f"Автор: {author.strip()}")
+
+img = soup.find("div", class_="bookimage").find("img")["src"]
+print(img)
