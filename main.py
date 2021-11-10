@@ -15,32 +15,36 @@ def get_file_name(url):
     return file_name
 
 
-def parse_book(response):
-    comments_text = ""
+def parse_book_page(response):
+    comments_text = []
     genres = []
+    book_attributes = {}
 
     soup = BeautifulSoup(response.text, "lxml")
     title_tag = soup.find("h1")
     title_text = title_tag.text
-    book_attributes = title_text.split("::")
+    heading_author = title_text.split("::")
 
-    if len(book_attributes) == 1:
-        book_attributes.append("no author")
+    if len(heading_author) == 1:
+        heading_author.append("no author")
+    heading, author = heading_author
+    book_attributes["heading"] = heading.strip()
+    book_attributes["author"] = author.strip()
 
     img = soup.find("div", class_="bookimage").find("img")["src"]
-    book_attributes.append(img)
+    book_attributes["image"] = img
 
     comments = soup.find_all("div", class_="texts")
     for comment in comments:
-        comments_text += comment.find("span").text + "\n"
-    book_attributes.append(comments_text)
+        comments_text.append(comment.find("span").text)
+    book_attributes["comments"] = comments_text
 
     book_genre_tags = soup.find_all("span", class_="d_book")
     for book_genre_tag in book_genre_tags:
         book_genres = book_genre_tag.find_all("a")
         for book_genre in book_genres:
             genres.append(book_genre.text)
-    book_attributes.append(genres)
+    book_attributes["genres"] = genres
 
     return book_attributes
 
@@ -88,21 +92,21 @@ def main():
             book_page_response = requests.get(book_page_url)
             book_page_response.raise_for_status()
 
-            heading, author, img, comments_text, genres = parse_book(
-                book_page_response
-            )
-            book_file_name = f"{book_id}. {heading.strip()}.txt"
+            book_attributes = parse_book_page(book_page_response)
+            heading = book_attributes["heading"]
+            image = book_attributes["image"]
+            book_file_name = f"{book_id}. {heading}.txt"
 
             txt_file_path = download_txt(
                 book_file_response, book_file_name, books_folder_name
             )
 
-            image_url = urljoin(book_page_url, img)
+            image_url = urljoin(book_page_url, image)
             image_file_name = get_file_name(image_url)
             img_file_path = download_image(
                 book_page_response, image_file_name, images_folder_name
             )
-            print(genres)
+            print(book_attributes)
         except requests.exceptions.HTTPError:
             pass
 
