@@ -22,12 +22,13 @@ def parse_book_page(response):
     book_attributes = {}
 
     soup = BeautifulSoup(response.text, "lxml")
+
     title_tag = soup.find("h1")
     title_text = title_tag.text
     heading_author = title_text.split("::")
 
     if len(heading_author) == 1:
-        heading_author.append("no author")
+        heading_author.append("Нет автора")
     heading, author = heading_author
     book_attributes["heading"] = heading.strip()
     book_attributes["author"] = author.strip()
@@ -104,6 +105,7 @@ def main():
             heading = book_attributes["heading"]
             author = book_attributes["author"]
             image = book_attributes["image"]
+
             book_file_name = f"{book_id}. {heading}.txt"
 
             txt_file_path = download_txt(
