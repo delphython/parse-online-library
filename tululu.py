@@ -9,13 +9,19 @@ soup = BeautifulSoup(response.text, "lxml")
 title_tag = soup.find("h1")
 title_text = title_tag.text
 heading, author = title_text.split("::")
-print(f"Заголовок: {heading.strip()}")
-print(f"Автор: {author.strip()}")
+# print(f"Заголовок: {heading.strip()}")
+# print(f"Автор: {author.strip()}")
 
 img = soup.find("div", class_="bookimage").find("img")["src"]
-print(img)
+# print(img)
 
 comments = soup.find_all("div", class_="texts")
 for comment in comments:
     c = comment.find("span")
-    print(c.text)
+    # print(c.text)
+
+genres = soup.find_all("span", class_="d_book")
+for genre in genres:
+    c = genre.find_all("a")
+    for cs in c:
+        print(cs.text)
