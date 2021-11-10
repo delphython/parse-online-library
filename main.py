@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import requests
@@ -31,8 +32,8 @@ def parse_book_page(response):
     book_attributes["heading"] = heading.strip()
     book_attributes["author"] = author.strip()
 
-    img = soup.find("div", class_="bookimage").find("img")["src"]
-    book_attributes["image"] = img
+    image = soup.find("div", class_="bookimage").find("img")["src"]
+    book_attributes["image"] = image
 
     comments = soup.find_all("div", class_="texts")
     for comment in comments:
@@ -71,16 +72,23 @@ def download_image(response, filename, folder="images/"):
 
 
 def main():
-    books_amount = 10
     books_folder_name = "books/"
+    images_folder_name = "images/"
+
+    parser = argparse.ArgumentParser(
+        description="Парсинг библиотеки tululu.ru"
+    )
+    parser.add_argument("start_id", default=1, help="с какой страницы качать")
+    parser.add_argument("end_id", default=10, help="по какую страницу качать")
+    args = parser.parse_args()
+
     books_dir = os.path.join(os.getcwd(), books_folder_name)
     os.makedirs(books_dir, exist_ok=True)
 
-    images_folder_name = "images/"
     images_dir = os.path.join(os.getcwd(), images_folder_name)
     os.makedirs(images_dir, exist_ok=True)
 
-    for book_id in range(1, books_amount + 1):
+    for book_id in range(int(args.start_id), int(args.end_id) + 1):
         book_file_url = f"https://tululu.org/txt.php?id={book_id}"
         try:
             book_file_response = requests.get(book_file_url)
