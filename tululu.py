@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-url = "http://tululu.org/b1/"
+url = "http://tululu.org/b9/"
 response = requests.get(url)
 response.raise_for_status()
 soup = BeautifulSoup(response.text, "lxml")
@@ -14,3 +14,8 @@ print(f"Автор: {author.strip()}")
 
 img = soup.find("div", class_="bookimage").find("img")["src"]
 print(img)
+
+comments = soup.find_all("div", class_="texts")
+for comment in comments:
+    c = comment.find("span")
+    print(c.text)
