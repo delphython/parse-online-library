@@ -102,6 +102,7 @@ def main():
 
             book_attributes = parse_book_page(book_page_response)
             heading = book_attributes["heading"]
+            author = book_attributes["author"]
             image = book_attributes["image"]
             book_file_name = f"{book_id}. {heading}.txt"
 
@@ -114,7 +115,8 @@ def main():
             img_file_path = download_image(
                 book_page_response, image_file_name, images_folder_name
             )
-            print(book_attributes)
+            print(f"Название: {heading}")
+            print(f"Автор: {author}\n")
         except requests.exceptions.HTTPError:
             pass
 
