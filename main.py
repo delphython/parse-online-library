@@ -17,6 +17,7 @@ def get_file_name(url):
 
 def parse_book(response):
     comments_text = ""
+    genres = []
 
     soup = BeautifulSoup(response.text, "lxml")
     title_tag = soup.find("h1")
@@ -33,6 +34,13 @@ def parse_book(response):
     for comment in comments:
         comments_text += comment.find("span").text + "\n"
     book_attributes.append(comments_text)
+
+    book_genre_tags = soup.find_all("span", class_="d_book")
+    for book_genre_tag in book_genre_tags:
+        book_genres = book_genre_tag.find_all("a")
+        for book_genre in book_genres:
+            genres.append(book_genre.text)
+    book_attributes.append(genres)
 
     return book_attributes
 
@@ -80,7 +88,7 @@ def main():
             book_page_response = requests.get(book_page_url)
             book_page_response.raise_for_status()
 
-            heading, author, img, comments_text = parse_book(
+            heading, author, img, comments_text, genres = parse_book(
                 book_page_response
             )
             book_file_name = f"{book_id}. {heading.strip()}.txt"
@@ -94,7 +102,7 @@ def main():
             img_file_path = download_image(
                 book_page_response, image_file_name, images_folder_name
             )
-            print(comments_text)
+            print(genres)
         except requests.exceptions.HTTPError:
             pass
 
