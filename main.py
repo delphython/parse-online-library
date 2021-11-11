@@ -23,13 +23,8 @@ def parse_book_page(response):
 
     soup = BeautifulSoup(response.text, "lxml")
 
-    title_tag = soup.find("h1")
-    title_text = title_tag.text
-    heading_author = title_text.split("::")
+    heading, author = soup.find("h1").text.split("::")
 
-    if len(heading_author) == 1:
-        heading_author.append("Нет автора")
-    heading, author = heading_author
     book_attributes["heading"] = heading.strip()
     book_attributes["author"] = author.strip()
 
