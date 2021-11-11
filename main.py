@@ -79,14 +79,18 @@ def main():
     parser = argparse.ArgumentParser(
         description="Парсинг библиотеки tululu.ru"
     )
-    parser.add_argument("start_id", default=1, help="с какой страницы качать")
-    parser.add_argument("end_id", default=10, help="по какую страницу качать")
+    parser.add_argument(
+        "start_id", default=1, type=int, help="с какой страницы качать"
+    )
+    parser.add_argument(
+        "end_id", default=10, type=int, help="по какую страницу качать"
+    )
     args = parser.parse_args()
 
     os.makedirs(books_folder_name, exist_ok=True)
     os.makedirs(images_folder_name, exist_ok=True)
 
-    for book_id in range(int(args.start_id), int(args.end_id) + 1):
+    for book_id in range(args.start_id, args.end_id + 1):
         book_file_url = f"https://tululu.org/txt.php?id={book_id}"
         try:
             book_file_response = requests.get(book_file_url)
