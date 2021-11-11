@@ -19,29 +19,30 @@ def get_file_name(url):
 def parse_book_page(response):
     comments_text = []
     genres = []
-    book_attributes = {}
 
     soup = BeautifulSoup(response.text, "lxml")
 
     heading, author = soup.find("h1").text.split("::")
 
-    book_attributes["heading"] = heading.strip()
-    book_attributes["author"] = author.strip()
-
     image = soup.find("div", class_="bookimage").find("img")["src"]
-    book_attributes["image"] = image
 
     comments = soup.find_all("div", class_="texts")
     for comment in comments:
         comments_text.append(comment.find("span").text)
-    book_attributes["comments"] = comments_text
 
     book_genre_tags = soup.find_all("span", class_="d_book")
     for book_genre_tag in book_genre_tags:
         book_genres = book_genre_tag.find_all("a")
         for book_genre in book_genres:
             genres.append(book_genre.text)
-    book_attributes["genres"] = genres
+
+    book_attributes = {
+        "heading": heading.strip(),
+        "author": author.strip(),
+        "image": image,
+        "comments": comments_text,
+        "genres": genres,
+    }
 
     return book_attributes
 
