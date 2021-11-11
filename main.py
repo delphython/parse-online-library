@@ -26,15 +26,16 @@ def parse_book_page(response):
 
     image = soup.find("div", class_="bookimage").find("img")["src"]
 
-    comments = soup.find_all("div", class_="texts")
-    for comment in comments:
-        comments_text.append(comment.find("span").text)
+    comments_text = [
+        comment.find("span").text
+        for comment in soup.find_all("div", class_="texts")
+    ]
 
-    book_genre_tags = soup.find_all("span", class_="d_book")
-    for book_genre_tag in book_genre_tags:
-        book_genres = book_genre_tag.find_all("a")
-        for book_genre in book_genres:
-            genres.append(book_genre.text)
+    genres = [
+        book_genre.text
+        for book_genre_tag in soup.find_all("span", class_="d_book")
+        for book_genre in book_genre_tag.find_all("a")
+    ]
 
     book_attributes = {
         "heading": heading.strip(),
@@ -54,7 +55,7 @@ def check_for_redirect(response, url):
 
 def download_txt(response, filename, folder="books/"):
     file_path = os.path.join(folder, sanitize_filename(filename))
-    with open(file_path, "wb") as file:
+    with open(file_path, "w") as file:
         file.write(response.text)
 
     return file_path
@@ -89,13 +90,13 @@ def main():
     for book_id in range(args.start_id, args.end_id + 1):
         payload = {"id": book_id}
         book_file_url = "https://tululu.org/txt.php"
+        book_page_url = f"https://tululu.org/b{book_id}"
         try:
             book_file_response = requests.get(book_file_url, params=payload)
             book_file_response.raise_for_status()
 
             check_for_redirect(book_file_response, book_file_url)
 
-            book_page_url = f"https://tululu.org/b{book_id}"
             book_page_response = requests.get(book_page_url)
             book_page_response.raise_for_status()
 
