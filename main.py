@@ -91,9 +91,10 @@ def main():
     os.makedirs(images_folder_name, exist_ok=True)
 
     for book_id in range(args.start_id, args.end_id + 1):
-        book_file_url = f"https://tululu.org/txt.php?id={book_id}"
+        payload = {"id": book_id}
+        book_file_url = "https://tululu.org/txt.php"
         try:
-            book_file_response = requests.get(book_file_url)
+            book_file_response = requests.get(book_file_url, params=payload)
             book_file_response.raise_for_status()
 
             check_for_redirect(book_file_response, book_file_url)
