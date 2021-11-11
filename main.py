@@ -83,11 +83,8 @@ def main():
     parser.add_argument("end_id", default=10, help="по какую страницу качать")
     args = parser.parse_args()
 
-    books_dir = os.path.join(os.getcwd(), books_folder_name)
-    os.makedirs(books_dir, exist_ok=True)
-
-    images_dir = os.path.join(os.getcwd(), images_folder_name)
-    os.makedirs(images_dir, exist_ok=True)
+    os.makedirs(books_folder_name, exist_ok=True)
+    os.makedirs(images_folder_name, exist_ok=True)
 
     for book_id in range(int(args.start_id), int(args.end_id) + 1):
         book_file_url = f"https://tululu.org/txt.php?id={book_id}"
