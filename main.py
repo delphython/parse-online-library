@@ -55,7 +55,7 @@ def check_for_redirect(response, url):
 def download_txt(response, filename, folder="books/"):
     file_path = os.path.join(folder, sanitize_filename(filename))
     with open(file_path, "wb") as file:
-        file.write(response.content)
+        file.write(response.text)
 
     return file_path
 
