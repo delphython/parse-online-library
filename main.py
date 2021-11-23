@@ -1,5 +1,8 @@
 import argparse
+import json
 import os
+
+from pprint import pprint
 
 import requests
 
@@ -69,57 +72,85 @@ def download_image(response, filename, folder="images/"):
     return file_path
 
 
+def get_books_id(response):
+    soup = BeautifulSoup(response.text, "lxml")
+
+    books_id = [
+        book_tags["href"]
+        for table_tags in soup.find_all("table", class_="d_book")
+        for div_tags in table_tags.find_all("div", class_="bookimage")
+        for book_tags in div_tags.find_all("a")
+    ]
+
+    return books_id
+
+
 def main():
     books_folder_name = "books/"
     images_folder_name = "images/"
+    pages = 4
+    fiction_books_attributes = []
 
-    parser = argparse.ArgumentParser(
-        description="Парсинг библиотеки tululu.ru"
-    )
-    parser.add_argument(
-        "start_id", default=1, type=int, help="с какой страницы качать"
-    )
-    parser.add_argument(
-        "end_id", default=10, type=int, help="по какую страницу качать"
-    )
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(
+    #     description="Парсинг библиотеки tululu.ru"
+    # )
+    # parser.add_argument(
+    #     "start_id", default=1, type=int, help="с какой страницы качать"
+    # )
+    # parser.add_argument(
+    #     "end_id", default=10, type=int, help="по какую страницу качать"
+    # )
+    # args = parser.parse_args()
 
     os.makedirs(books_folder_name, exist_ok=True)
     os.makedirs(images_folder_name, exist_ok=True)
 
-    for book_id in range(args.start_id, args.end_id + 1):
-        payload = {"id": book_id}
-        book_file_url = "https://tululu.org/txt.php"
-        book_page_url = f"https://tululu.org/b{book_id}"
-        try:
-            book_file_response = requests.get(book_file_url, params=payload)
-            book_file_response.raise_for_status()
+    # for book_id in range(args.start_id, args.end_id + 1):
+    for page in range(1, pages + 1):
+        fiction_category_url = f"http://tululu.org/l55/{page}/"
+        response = requests.get(fiction_category_url)
+        response.raise_for_status()
+        books_id = get_books_id(response)
+        for book_id in books_id:
+            payload = {"id": book_id}
+            book_file_url = "https://tululu.org/txt.php"
+            book_page_url = urljoin(fiction_category_url, book_id)
+            # book_page_url = f"https://tululu.org/b{book_id}"
+            try:
+                book_file_response = requests.get(
+                    book_file_url, params=payload
+                )
+                book_file_response.raise_for_status()
 
-            check_for_redirect(book_file_response, book_file_url)
+                # check_for_redirect(book_file_response, book_file_url)
 
-            book_page_response = requests.get(book_page_url)
-            book_page_response.raise_for_status()
+                book_page_response = requests.get(book_page_url)
+                book_page_response.raise_for_status()
 
-            book_attributes = parse_book_page(book_page_response)
-            heading = book_attributes["heading"]
-            author = book_attributes["author"]
-            image = book_attributes["image"]
+                book_attributes = parse_book_page(book_page_response)
+                fiction_books_attributes.append(book_attributes)
+                heading = book_attributes["heading"]
+                author = book_attributes["author"]
+                image = book_attributes["image"]
 
-            book_file_name = f"{book_id}. {heading}.txt"
+                book_file_name = f"{book_id}. {heading}.txt"
 
-            txt_file_path = download_txt(
-                book_file_response, book_file_name, books_folder_name
-            )
+                txt_file_path = download_txt(
+                    book_file_response, book_file_name, books_folder_name
+                )
 
-            image_url = urljoin(book_page_url, image)
-            image_file_name = get_file_name(image_url)
-            img_file_path = download_image(
-                book_page_response, image_file_name, images_folder_name
-            )
-            print(f"Название: {heading}")
-            print(f"Автор: {author}\n")
-        except requests.exceptions.HTTPError:
-            pass
+                image_url = urljoin(book_page_url, image)
+                image_file_name = get_file_name(image_url)
+                img_file_path = download_image(
+                    book_page_response, image_file_name, images_folder_name
+                )
+                # print(f"Название: {heading}")
+                # print(f"Автор: {author}\n")
+            except requests.exceptions.HTTPError:
+                pass
+    # pprint(fiction_books_attributes)
+    with open("fiction_books.json", "w") as json_file:
+        json.dump(fiction_books_attributes, json_file, ensure_ascii=False)
 
 
 if __name__ == "__main__":
