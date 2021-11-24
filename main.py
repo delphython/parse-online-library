@@ -2,8 +2,6 @@ import argparse
 import json
 import os
 
-from pprint import pprint
-
 import requests
 
 from bs4 import BeautifulSoup
@@ -42,11 +40,6 @@ def parse_book_page(response):
     }
 
     return book_attributes
-
-
-def check_for_redirect(response, url):
-    if response.history and response.url != url:
-        raise requests.HTTPError()
 
 
 def download_txt(response, filename, folder="books/"):
@@ -89,8 +82,6 @@ def get_last_page_number(url):
 
 
 def main():
-    # books_folder_name = "books/"
-    # images_folder_name = "images/"
     fiction_books_attributes = []
     first_page_fiction_category_url = "http://tululu.org/l55/"
 
@@ -110,7 +101,6 @@ def main():
     )
     parser.add_argument(
         "--dest_folder",
-        default="",
         help="путь к каталогу с результатами парсинга: картинкам, книгам, JSON",
     )
     parser.add_argument(
@@ -125,7 +115,6 @@ def main():
     )
     parser.add_argument(
         "--json_path",
-        default="fiction_books.json",
         help="указать свой путь к *.json файлу с результатами",
     )
     args = parser.parse_args()
@@ -146,17 +135,13 @@ def main():
             personal_folder_name, "fiction_books.json"
         )
 
-    os.makedirs(books_folder_name, exist_ok=True)
-    os.makedirs(images_folder_name, exist_ok=True)
-
-    start_page = args.start_page if args.start_page else 1
     end_page = (
         args.end_page
         if args.end_page
         else get_last_page_number(first_page_fiction_category_url)
     )
 
-    for page in range(start_page, end_page + 1):
+    for page in range(args.start_page, end_page + 1):
         fiction_category_url = f"http://tululu.org/l55/{page}/"
         response = requests.get(fiction_category_url)
         response.raise_for_status()
@@ -165,39 +150,33 @@ def main():
             payload = {"id": book_id}
             book_file_url = "https://tululu.org/txt.php"
             book_page_url = urljoin(fiction_category_url, book_id)
-            # book_page_url = f"https://tululu.org/b{book_id}"
-            try:
-                book_file_response = requests.get(
-                    book_file_url, params=payload
+
+            book_file_response = requests.get(book_file_url, params=payload)
+            book_file_response.raise_for_status()
+
+            book_page_response = requests.get(book_page_url)
+            book_page_response.raise_for_status()
+
+            book_attributes = parse_book_page(book_page_response)
+            fiction_books_attributes.append(book_attributes)
+            heading = book_attributes["heading"]
+            image = book_attributes["image"]
+
+            if args.skip_txt:
+                os.makedirs(books_folder_name, exist_ok=True)
+                book_file_name = f"{book_id}. {heading}.txt"
+                txt_file_path = download_txt(
+                    book_file_response, book_file_name, books_folder_name
                 )
-                book_file_response.raise_for_status()
 
-                # check_for_redirect(book_file_response, book_file_url)
+            if args.skip_imgs:
+                os.makedirs(images_folder_name, exist_ok=True)
+                image_url = urljoin(book_page_url, image)
+                image_file_name = get_file_name(image_url)
+                img_file_path = download_image(
+                    book_page_response, image_file_name, images_folder_name
+                )
 
-                book_page_response = requests.get(book_page_url)
-                book_page_response.raise_for_status()
-
-                book_attributes = parse_book_page(book_page_response)
-                fiction_books_attributes.append(book_attributes)
-                heading = book_attributes["heading"]
-                author = book_attributes["author"]
-                image = book_attributes["image"]
-
-                if args.skip_txt:
-                    book_file_name = f"{book_id}. {heading}.txt"
-                    txt_file_path = download_txt(
-                        book_file_response, book_file_name, books_folder_name
-                    )
-
-                if args.skip_imgs:
-                    image_url = urljoin(book_page_url, image)
-                    image_file_name = get_file_name(image_url)
-                    img_file_path = download_image(
-                        book_page_response, image_file_name, images_folder_name
-                    )
-            except requests.exceptions.HTTPError:
-                pass
-    # pprint(fiction_books_attributes)
     with open(fiction_books_filename, "w") as json_file:
         json.dump(fiction_books_attributes, json_file, ensure_ascii=False)
 
