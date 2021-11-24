@@ -25,20 +25,13 @@ def parse_book_page(response):
 
     soup = BeautifulSoup(response.text, "lxml")
 
-    heading, author = soup.find("h1").text.split("::")
+    heading, author = soup.select_one("h1").text.split("::")
 
-    image = soup.find("div", class_="bookimage").find("img")["src"]
+    image = soup.select_one("div.bookimage img")["src"]
 
-    comments_text = [
-        comment.find("span").text
-        for comment in soup.find_all("div", class_="texts")
-    ]
+    comments_text = [comment.text for comment in soup.select("div.texts span")]
 
-    genres = [
-        book_genre.text
-        for book_genre_tag in soup.find_all("span", class_="d_book")
-        for book_genre in book_genre_tag.find_all("a")
-    ]
+    genres = [book_genre.text for book_genre in soup.select("span.d_book a")]
 
     book_attributes = {
         "heading": heading.strip(),
@@ -77,9 +70,7 @@ def get_books_id(response):
 
     books_id = [
         book_tags["href"]
-        for table_tags in soup.find_all("table", class_="d_book")
-        for div_tags in table_tags.find_all("div", class_="bookimage")
-        for book_tags in div_tags.find_all("a")
+        for book_tags in soup.select("table.d_book div.bookimage a")
     ]
 
     return books_id
@@ -88,7 +79,7 @@ def get_books_id(response):
 def main():
     books_folder_name = "books/"
     images_folder_name = "images/"
-    pages = 4
+    pages = 1
     fiction_books_attributes = []
 
     # parser = argparse.ArgumentParser(
