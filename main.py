@@ -76,28 +76,54 @@ def get_books_id(response):
     return books_id
 
 
+def get_last_page_number(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "lxml")
+
+    last_page_numbers = [
+        page_number.text for page_number in soup.select("a.npage")
+    ]
+
+    return last_page_numbers[-1]
+
+
 def main():
     books_folder_name = "books/"
     images_folder_name = "images/"
-    pages = 1
     fiction_books_attributes = []
+    first_page_fiction_category_url = "http://tululu.org/l55/"
 
-    # parser = argparse.ArgumentParser(
-    #     description="Парсинг библиотеки tululu.ru"
-    # )
-    # parser.add_argument(
-    #     "start_id", default=1, type=int, help="с какой страницы качать"
-    # )
-    # parser.add_argument(
-    #     "end_id", default=10, type=int, help="по какую страницу качать"
-    # )
-    # args = parser.parse_args()
+    parser = argparse.ArgumentParser(
+        description="Парсинг библиотеки tululu.ru"
+    )
+    parser.add_argument(
+        "-start_page",
+        "--start_page",
+        default=1,
+        type=int,
+        help="с какой страницы качать",
+    )
+    parser.add_argument(
+        "-end_page",
+        "--end_page",
+        default=10,
+        type=int,
+        help="по какую страницу качать",
+    )
+    args = parser.parse_args()
 
     os.makedirs(books_folder_name, exist_ok=True)
     os.makedirs(images_folder_name, exist_ok=True)
 
-    # for book_id in range(args.start_id, args.end_id + 1):
-    for page in range(1, pages + 1):
+    start_page = args.start_page if args.start_page else 1
+    end_page = (
+        args.end_page
+        if args.end_page
+        else get_last_page_number(first_page_fiction_category_url)
+    )
+
+    for page in range(start_page, end_page + 1):
         fiction_category_url = f"http://tululu.org/l55/{page}/"
         response = requests.get(fiction_category_url)
         response.raise_for_status()
