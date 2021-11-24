@@ -89,8 +89,8 @@ def get_last_page_number(url):
 
 
 def main():
-    books_folder_name = "books/"
-    images_folder_name = "images/"
+    # books_folder_name = "books/"
+    # images_folder_name = "images/"
     fiction_books_attributes = []
     first_page_fiction_category_url = "http://tululu.org/l55/"
 
@@ -98,20 +98,51 @@ def main():
         description="Парсинг библиотеки tululu.ru"
     )
     parser.add_argument(
-        "-start_page",
         "--start_page",
         default=1,
         type=int,
         help="с какой страницы качать",
     )
     parser.add_argument(
-        "-end_page",
         "--end_page",
-        default=10,
         type=int,
         help="по какую страницу качать",
     )
+    parser.add_argument(
+        "--dest_folder",
+        default="",
+        help="путь к каталогу с результатами парсинга: картинкам, книгам, JSON",
+    )
+    parser.add_argument(
+        "--skip_imgs",
+        action="store_false",
+        help="не скачивать картинки",
+    )
+    parser.add_argument(
+        "--skip_txt",
+        action="store_false",
+        help="не скачивать книги",
+    )
+    parser.add_argument(
+        "--json_path",
+        default="",
+        help="указать свой путь к *.json файлу с результатами",
+    )
     args = parser.parse_args()
+
+    personal_folder_name = args.dest_folder if args.dest_folder else ""
+    books_folder_name = os.path.join(
+        os.getcwd(), personal_folder_name, "books/"
+    )
+    images_folder_name = os.path.join(
+        os.getcwd(), personal_folder_name, "images/"
+    )
+
+    if args.json_path:
+        os.makedirs(os.path.dirname(args.json_path), exist_ok=True)
+        fiction_books_filename = args.json_path
+    else:
+        fiction_books_filename = "fiction_books.json"
 
     os.makedirs(books_folder_name, exist_ok=True)
     os.makedirs(images_folder_name, exist_ok=True)
@@ -150,23 +181,22 @@ def main():
                 author = book_attributes["author"]
                 image = book_attributes["image"]
 
-                book_file_name = f"{book_id}. {heading}.txt"
+                if args.skip_txt:
+                    book_file_name = f"{book_id}. {heading}.txt"
+                    txt_file_path = download_txt(
+                        book_file_response, book_file_name, books_folder_name
+                    )
 
-                txt_file_path = download_txt(
-                    book_file_response, book_file_name, books_folder_name
-                )
-
-                image_url = urljoin(book_page_url, image)
-                image_file_name = get_file_name(image_url)
-                img_file_path = download_image(
-                    book_page_response, image_file_name, images_folder_name
-                )
-                # print(f"Название: {heading}")
-                # print(f"Автор: {author}\n")
+                if args.skip_imgs:
+                    image_url = urljoin(book_page_url, image)
+                    image_file_name = get_file_name(image_url)
+                    img_file_path = download_image(
+                        book_page_response, image_file_name, images_folder_name
+                    )
             except requests.exceptions.HTTPError:
                 pass
     # pprint(fiction_books_attributes)
-    with open("fiction_books.json", "w") as json_file:
+    with open(fiction_books_filename, "w") as json_file:
         json.dump(fiction_books_attributes, json_file, ensure_ascii=False)
 
 
