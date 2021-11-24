@@ -125,7 +125,7 @@ def main():
     )
     parser.add_argument(
         "--json_path",
-        default="",
+        default="fiction_books.json",
         help="указать свой путь к *.json файлу с результатами",
     )
     args = parser.parse_args()
@@ -142,7 +142,9 @@ def main():
         os.makedirs(os.path.dirname(args.json_path), exist_ok=True)
         fiction_books_filename = args.json_path
     else:
-        fiction_books_filename = "fiction_books.json"
+        fiction_books_filename = os.path.join(
+            personal_folder_name, "fiction_books.json"
+        )
 
     os.makedirs(books_folder_name, exist_ok=True)
     os.makedirs(images_folder_name, exist_ok=True)
