@@ -108,11 +108,16 @@ def main():
     parser.add_argument(
         "--dest_folder",
         default=os.getcwd(),
-        help=("путь к каталогу с результатами парсинга:" +
-              "картинкам, книгам, JSON"),
+        help=(
+            "путь к каталогу с результатами парсинга:"
+            + "картинкам, книгам, JSON"
+        ),
     )
-    parser.add_argument("--skip_imgs", action="store_true",
-                        help="не скачивать картинки",)
+    parser.add_argument(
+        "--skip_imgs",
+        action="store_true",
+        help="не скачивать картинки",
+    )
     parser.add_argument(
         "--skip_txt",
         action="store_true",
@@ -125,12 +130,8 @@ def main():
     )
     args = parser.parse_args()
 
-    books_folder_name = os.path.join(
-        args.dest_folder, "books/"
-    )
-    images_folder_name = os.path.join(
-        args.dest_folder, "images/"
-    )
+    books_folder_name = os.path.join(args.dest_folder, "books/")
+    images_folder_name = os.path.join(args.dest_folder, "images/")
 
     if os.path.dirname(args.json_path):
         os.makedirs(os.path.dirname(args.json_path), exist_ok=True)
