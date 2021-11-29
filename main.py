@@ -107,6 +107,7 @@ def main():
     )
     parser.add_argument(
         "--dest_folder",
+        default=os.getcwd(),
         help="путь к каталогу с результатами парсинга: картинкам, книгам, JSON",
     )
     parser.add_argument(
@@ -126,12 +127,12 @@ def main():
     )
     args = parser.parse_args()
 
-    personal_folder_name = args.dest_folder if args.dest_folder else ""
+    # personal_folder_name = args.dest_folder if args.dest_folder else ""
     books_folder_name = os.path.join(
-        os.getcwd(), personal_folder_name, "books/"
+        args.dest_folder, "books/"
     )
     images_folder_name = os.path.join(
-        os.getcwd(), personal_folder_name, "images/"
+        args.dest_folder, "images/"
     )
 
     if os.path.dirname(args.json_path):
