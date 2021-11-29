@@ -108,7 +108,8 @@ def main():
     parser.add_argument(
         "--dest_folder",
         default=os.getcwd(),
-        help="путь к каталогу с результатами парсинга: картинкам, книгам, JSON",
+        help=("путь к каталогу с результатами парсинга:" +
+              "картинкам, книгам, JSON"),
     )
     parser.add_argument(
         "--skip_imgs",
