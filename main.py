@@ -127,7 +127,6 @@ def main():
     )
     args = parser.parse_args()
 
-    # personal_folder_name = args.dest_folder if args.dest_folder else ""
     books_folder_name = os.path.join(
         args.dest_folder, "books/"
     )
