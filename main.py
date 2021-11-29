@@ -111,11 +111,8 @@ def main():
         help=("путь к каталогу с результатами парсинга:" +
               "картинкам, книгам, JSON"),
     )
-    parser.add_argument(
-        "--skip_imgs",
-        action="store_true",
-        help="не скачивать картинки",
-    )
+    parser.add_argument("--skip_imgs", action="store_true",
+                        help="не скачивать картинки",)
     parser.add_argument(
         "--skip_txt",
         action="store_true",
