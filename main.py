@@ -55,7 +55,9 @@ def download_txt(response, filename, folder="books/"):
     return file_path
 
 
-def download_image(response, filename, folder="images/"):
+def download_image(url, filename, folder="images/"):
+    response = requests.get(url)
+    response.raise_for_status()
     file_path = os.path.join(folder, filename)
     with open(file_path, "wb") as file:
         file.write(response.content)
@@ -107,7 +109,7 @@ def main():
     )
     parser.add_argument(
         "--dest_folder",
-        default=os.getcwd(),
+        default="",
         help=(
             "путь к каталогу с результатами парсинга:"
             + "картинкам, книгам, JSON"
@@ -159,7 +161,6 @@ def main():
                 book_page_response.raise_for_status()
 
                 book_attributes = parse_book_page(book_page_response)
-                fiction_books_attributes.append(book_attributes)
                 heading = book_attributes["heading"]
                 image = book_attributes["image"]
 
@@ -175,8 +176,11 @@ def main():
                     image_url = urljoin(book_page_url, image)
                     image_file_name = get_file_name(image_url)
                     img_file_path = download_image(
-                        book_page_response, image_file_name, images_folder_name
+                        image_url, image_file_name, images_folder_name
                     )
+                    book_attributes["image"] = img_file_path
+
+                fiction_books_attributes.append(book_attributes)
             except requests.exceptions.HTTPError:
                 pass
 
