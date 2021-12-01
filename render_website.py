@@ -1,4 +1,5 @@
 import json
+import math
 import os
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -17,16 +18,24 @@ def on_reload(file):
 
     template = env.get_template("template.html")
 
-    with open(file, "r") as books_atributes:
-        books_json = books_atributes.read()
+    with open(file, "r") as books_atributes_json:
+        books_json = books_atributes_json.read()
+
+    books_atributes = json.loads(books_json)
+
+    pages_count = math.ceil(len(books_atributes) / books_on_page)
 
     os.makedirs(pages_folder_name, exist_ok=True)
-    books = chunked(json.loads(books_json), books_on_page)
+    books = chunked(books_atributes, books_on_page)
 
     for i, paged_books in enumerate(books, 1):
         index_file_path = os.path.join(pages_folder_name, f"index{i}.html")
 
-        rendered_page = template.render(books=chunked(paged_books, 2))
+        rendered_page = template.render(
+            books=chunked(paged_books, 2),
+            pages_count=pages_count,
+            page_number=i,
+        )
 
         with open(index_file_path, "w", encoding="utf8") as file:
             file.write(rendered_page)
