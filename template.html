@@ -24,7 +24,8 @@
                   <div class="card-body">
                     <h5 class="card-title">{{book.author}}</h5>
                     <p class="card-text">{{book.heading}}</p>
-                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                    <a href="{{book.text|urlencode}}" target="_blank">читать</a>
+                    <!-- <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
                   </div>
                 </div>
               </div>

@@ -166,10 +166,11 @@ def main():
 
                 if not args.skip_txt:
                     os.makedirs(books_folder_name, exist_ok=True)
-                    book_file_name = f"{book_id}. {heading}.txt"
+                    book_file_name = f"{book_id}.{heading}.txt"
                     txt_file_path = download_txt(
                         book_file_response, book_file_name, books_folder_name
                     )
+                    book_attributes["text"] = txt_file_path
 
                 if not args.skip_imgs:
                     os.makedirs(images_folder_name, exist_ok=True)
