@@ -28,13 +28,13 @@ def on_reload(file):
     os.makedirs(pages_folder_name, exist_ok=True)
     books = chunked(books_atributes, books_on_page)
 
-    for i, paged_books in enumerate(books, 1):
-        index_file_path = os.path.join(pages_folder_name, f"index{i}.html")
+    for index, paged_books in enumerate(books, 1):
+        index_file_path = os.path.join(pages_folder_name, f"index{index}.html")
 
         rendered_page = template.render(
             books=chunked(paged_books, 2),
             pages_count=pages_count,
-            page_number=i,
+            page_number=index,
         )
 
         with open(index_file_path, "w", encoding="utf8") as file:
